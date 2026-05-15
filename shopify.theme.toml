@@ -1,0 +1,2 @@
+[environments.development]
+store = "https://pankat-test-store.myshopify.com/"
