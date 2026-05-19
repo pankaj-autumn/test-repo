@@ -1,5 +1,30 @@
 {%- assign badge = product.metafields.custom.badge -%}
 
+<style>
+  .product-label {
+    position: absolute;
+    z-index: 2;
+    padding: 10px;
+  }
+  
+  .position-top-left {
+    top: 0;
+    left: 0;
+  }
+  .position-top-right {
+    top: 0;
+    right: 0;
+  }
+  .position-bottom-left {
+    bottom: 0;
+    left: 0;
+  }
+  .position-bottom-right {
+    bottom: 0;
+    right: 0;
+  }
+</style>
+
 {%- if badge != blank -%}
     
 <script>
@@ -9,12 +34,12 @@
   });
 </script>
 
-  <div class="product-label">
+  <div class="product-label position-{{ custom_badge_position }}">
     {%- assign background_color = badge.value.color.value -%}
     {%- assign color_string = "" | append : background_color -%}
     {%- assign text_color = color_string | color_lighten: 100 -%}
     
-    <small class="product-label__badge" style="background-color: {{ background_color }}; color: {{ text_color }}; border-radius: 5px; padding : 5px; outline : 10px solid #000000">
+    <small class="product-label__badge" style="background-color: {{ background_color }}; color: {{ text_color }}; border-radius: 5px; padding : 5px;">
       {{ badge.value.text.value }}
     </small>
   </div>
