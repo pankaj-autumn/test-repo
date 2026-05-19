@@ -29,7 +29,6 @@
     assign card_style = settings.collection_card_style
   endif
 -%}
-
 <div class="card-wrapper animate-arrow {% if wrapper_class and wrapper_class != 'none' %}{{ wrapper_class }}{% else %}collection-card-wrapper{% endif %}">
   <div
     class="
@@ -96,18 +95,14 @@
               {%- endif %}
             </a>
           </h3>
-          {%- if card_collection.description != blank -%}
-            <p class="card__caption">
-              {{- card_collection.description | strip_html | truncatewords: 12 -}}
-              <span class="icon-wrap">&nbsp;{% render 'icon-arrow' %}</span>
-            </p>
-          {%- endif -%}
+
         </div>
       </div>
     </div>
     {% if card_style == 'card' or card_collection.featured_image %}
       <div class="card__content">
         <div class="card__information">
+          {% render 'product-label', product : card_collection %}
           <h3 class="card__heading">
             <a
               {% if card_collection == blank %}

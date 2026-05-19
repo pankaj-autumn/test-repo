@@ -1,0 +1,21 @@
+{%- assign badge = product.metafields.custom.badge -%}
+
+{%- if badge != blank -%}
+    
+<script>
+  console.log({
+    text: {{ badge.value.text.value | json }},
+    color: {{ badge.value.color.value | json }}
+  });
+</script>
+
+  <div class="product-label">
+    {%- assign background_color = badge.value.color.value -%}
+    {%- assign color_string = "" | append : background_color -%}
+    {%- assign text_color = color_string | color_lighten: 100 -%}
+    
+    <small class="product-label__badge" style="background-color: {{ background_color }}; color: {{ text_color }}; border-radius: 5px; padding : 5px; outline : 10px solid #000000">
+      {{ badge.value.text.value }}
+    </small>
+  </div>
+{%- endif -%}

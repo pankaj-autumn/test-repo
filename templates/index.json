@@ -375,6 +375,55 @@
         "padding_top": 36,
         "padding_bottom": 36
       }
+    },
+    "custom_section_nhcUq8": {
+      "type": "custom-section",
+      "blocks": {
+        "item_W8D6aa": {
+          "type": "item",
+          "settings": {
+            "icon": "none",
+            "title": "Feature title",
+            "text": "Describe a key benefit or piece of information here."
+          }
+        },
+        "item_Tr8aC4": {
+          "type": "item",
+          "settings": {
+            "icon": "none",
+            "title": "Feature title",
+            "text": "Describe a key benefit or piece of information here."
+          }
+        },
+        "item_VHcrDW": {
+          "type": "item",
+          "settings": {
+            "icon": "none",
+            "title": "Feature title",
+            "text": "Describe a key benefit or piece of information here."
+          }
+        }
+      },
+      "block_order": [
+        "item_W8D6aa",
+        "item_Tr8aC4",
+        "item_VHcrDW"
+      ],
+      "name": "t:sections.custom_content.presets.name",
+      "settings": {
+        "heading": "Custom content section",
+        "subheading": "test",
+        "content": "<p>zxsxs</p>",
+        "show_button": true,
+        "button_label": "Learn more",
+        "button_link": "",
+        "text_alignment": "left",
+        "width": "wide",
+        "max_width": 1200,
+        "padding_y": 64,
+        "padding_x": 16,
+        "blocks_per_row": 3
+      }
     }
   },
   "order": [
@@ -387,6 +436,7 @@
     "multirow_Wqz4gE",
     "video_CejkHd",
     "featured_blog_xJbk6e",
-    "contact_form_iYPAyi"
+    "contact_form_iYPAyi",
+    "custom_section_nhcUq8"
   ]
 }

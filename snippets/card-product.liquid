@@ -49,6 +49,8 @@
         class="card__inner {% if settings.card_style == 'standard' %}color-{{ settings.card_color_scheme }} gradient{% endif %}{% if card_product.featured_media or settings.card_style == 'standard' %} ratio{% endif %}"
         style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
       >
+              {% render 'product-label', product: card_product %}
+
         {%- if card_product.featured_media -%}
           <div class="card__media">
             <div class="media media--transparent media--hover-effect">
@@ -97,6 +99,9 @@
               {%- endif -%}
             </div>
           </div>
+        {%- endif -%}
+        {%- if card_product.description -%}
+          <p>{{ card_product.description | truncate: 120 }}</p>
         {%- endif -%}
         <div class="card__content">
           <div class="card__information">
@@ -319,6 +324,7 @@
               id="Badge-{{ section_id }}-{{ card_product.id }}"
               class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}"
             >
+              
               {{- 'products.product.sold_out' | t -}}
             </span>
           {%- elsif card_product.compare_at_price > card_product.price and card_product.available -%}

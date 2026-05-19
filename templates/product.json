@@ -29,6 +29,13 @@
             "picker_type": "button"
           }
         },
+        "text_jwMPjB": {
+          "type": "text",
+          "settings": {
+            "text": "<strong>Badge: </strong><strong>{{ product.metafields.custom.badge.value.text.value }}</strong>",
+            "text_style": "body"
+          }
+        },
         "quantity_selector": {
           "type": "quantity_selector",
           "disabled": true,
@@ -61,6 +68,7 @@
         "title",
         "vendor",
         "variant_picker",
+        "text_jwMPjB",
         "quantity_selector",
         "price",
         "buy_buttons",
