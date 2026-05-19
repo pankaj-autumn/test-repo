@@ -29,12 +29,6 @@
             "picker_type": "button"
           }
         },
-        "color_variant_picker": {
-          "type": "variant_picker",
-          "settings": {
-            "picker_type": "button"
-          }
-        },
         "text_jwMPjB": {
           "type": "text",
           "settings": {
