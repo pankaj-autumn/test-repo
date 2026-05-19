@@ -1,10 +1,13 @@
-{%- assign badge = product.metafields.custom.badge -%}
+{%- assign badges = product.metafields.custom.badges -%}
 
 <style>
   .product-label {
     position: absolute;
     z-index: 2;
     padding: 10px;
+     display: flex;         
+    flex-direction: column; 
+    gap: 5px;           
   }
   
   .position-top-left {
@@ -25,22 +28,18 @@
   }
 </style>
 
-{%- if badge != blank -%}
-    
-<script>
-  console.log({
-    text: {{ badge.value.text.value | json }},
-    color: {{ badge.value.color.value | json }}
-  });
-</script>
+{%- if badges != blank -%}
+
 
   <div class="product-label position-{{ custom_badge_position }}">
-    {%- assign background_color = badge.value.color.value -%}
-    {%- assign color_string = "" | append : background_color -%}
-    {%- assign text_color = color_string | color_lighten: 100 -%}
-    
+    {%- for badge in badges.value -%}
+      {%- assign background_color = badge.color.value -%}
+      {%- assign color_string = "" | append : background_color -%}
+      {%- assign text_color = color_string | color_lighten: 100 -%}
+
     <small class="product-label__badge" style="background-color: {{ background_color }}; color: {{ text_color }}; border-radius: 5px; padding : 5px;">
-      {{ badge.value.text.value }}
+      {{ badge.text.value }}
     </small>
+    {%- endfor -%}
   </div>
 {%- endif -%}

@@ -29,10 +29,16 @@
             "picker_type": "button"
           }
         },
+        "color_variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button"
+          }
+        },
         "text_jwMPjB": {
           "type": "text",
           "settings": {
-            "text": "<strong>Badge: </strong><strong>{{ product.metafields.custom.badge.value.text.value }}</strong>",
+            "text": "<strong>Badge: </strong>{{ product.metafields.custom.badges | metafield_text: field: 'text' }}",
             "text_style": "body"
           }
         },

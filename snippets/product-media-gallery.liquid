@@ -6,7 +6,7 @@
   - product: {Object} Product liquid object
   - variant_images: {Array} Product images associated with a variant
   - is_duplicate: {Boolean} Prevents rendering uneeded elements and duplicate ids for subsequent instances
-
+  - custom_badge_position: {String} Position of the product badge
   Usage:
   {% render 'product-media-gallery', is_duplicate: true %}
 {% endcomment %}
@@ -52,7 +52,8 @@
   aria-label="{{ 'products.product.media.gallery_viewer' | t }}"
   data-desktop-layout="{{ section.settings.gallery_layout }}"
 >
-  {% render 'product-label', product : product %}
+ <div style="position: relative;"> 
+  {% render 'product-label', product : product, custom_badge_position: custom_badge_position %}
   <div id="GalleryStatus-{{ section.id }}" class="visually-hidden" role="status"></div>
   <slider-component id="GalleryViewer-{{ section.id }}{{ id_append }}" class="slider-mobile-gutter">
     {%- unless is_duplicate -%}
@@ -148,6 +149,7 @@
       </div>
     {%- endunless -%}
   </slider-component>
+  </div>
   {%- if first_3d_model -%}
     <button
       class="button button--full-width product__xr-button"

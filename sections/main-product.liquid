@@ -57,7 +57,7 @@
 
   <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
     <div class="grid__item product__media-wrapper{% if section.settings.media_position == 'right' %} medium-hide large-up-hide{% endif %}">
-      {% render 'product-media-gallery', variant_images: variant_images %}
+      {% render 'product-media-gallery', variant_images: variant_images, custom_badge_position: section.settings.custom_badge_position %}
     </div>
     <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}">
       <product-info
@@ -444,7 +444,7 @@
     {%- if section.settings.media_position == 'right' -%}
       {% comment %} Duplicate gallery to display after product content on tablet/desktop breakpoint {% endcomment %}
       <div class="grid__item product__media-wrapper small-hide">
-        {% render 'product-media-gallery', variant_images: variant_images, is_duplicate: true %}
+        {% render 'product-media-gallery', variant_images: variant_images, is_duplicate: true, custom_badge_position: section.settings.custom_badge_position %}
       </div>
     {%- endif -%}
   </div>
@@ -698,6 +698,7 @@
       "name": "t:sections.main-product.blocks.quantity_selector.name",
       "limit": 1
     },
+    
     {
       "type": "variant_picker",
       "name": "t:sections.main-product.blocks.variant_picker.name",
@@ -2039,6 +2040,30 @@
       ],
       "default": "hide",
       "label": "t:sections.main-product.settings.mobile_thumbnails.label"
+    },
+     {
+      "type": "select",
+      "id": "custom_badge_position",
+      "options": [
+        {
+          "value": "top-left",
+          "label": "Top left"
+        },
+        {
+          "value": "top-right",
+          "label": "Top right"
+        },
+        {
+          "value": "bottom-left",
+          "label": "Bottom left"
+        },
+        {
+          "value": "bottom-right",
+          "label": "Bottom right"
+        }
+      ],
+      "default": "top-left",
+      "label": "Custom Badge Position"
     },
     {
       "type": "checkbox",
