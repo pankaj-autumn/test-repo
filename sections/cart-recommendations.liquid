@@ -7,6 +7,7 @@
   falls back to a manual collection if there are no recommendations.
 {% endcomment %}
 
+{%- if cart.item_count > 0 -%}
 {% assign limit = section.settings.limit | default: 4 %}
 
 {% if section.settings.heading != blank %}
@@ -63,6 +64,13 @@
   .cart-recommendations-empty {
     text-align: center;
     margin: 1.5rem 0 2rem;
+  }
+
+  /* Dynamic CSS: Hide section when the cart becomes empty */
+  body:has(cart-items.is-empty) .cart-recommendations-heading,
+  body:has(cart-items.is-empty) #cart-recommendations-root,
+  body:has(cart-items.is-empty) .cart-recommendations-empty {
+    display: none !important;
   }
 </style>
 
@@ -161,6 +169,7 @@
     }
   });
 </script>
+{%- endif -%}
 
 {% schema %}
 {
