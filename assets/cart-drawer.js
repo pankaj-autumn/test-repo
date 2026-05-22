@@ -77,9 +77,10 @@ class CartDrawer extends HTMLElement {
   }
 
   getSectionInnerHTML(html, selector = '.shopify-section') {
-    return new DOMParser()
+    const section = new DOMParser()
       .parseFromString(html, 'text/html')
-      .querySelector(selector).innerHTML;
+      .querySelector(selector);
+    return section ? section.innerHTML : '';
   }
 
   getSectionsToRender() {

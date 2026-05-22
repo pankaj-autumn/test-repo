@@ -15,15 +15,7 @@
   </h2>
 {% endif %}
 
-{%- comment -%}
-  Primary data source: recommendations.products
-{%- endcomment -%}
-
 {% assign products = recommendations.products | slice: 0, limit %}
-
-{%- comment -%}
-  Fallback: if no recommendation products, use a configured collection.
-{%- endcomment -%}
 {% if products == blank and section.settings.fallback_collection != blank %}
   {% assign fallback_collection = collections[section.settings.fallback_collection] %}
   {% if fallback_collection %}
@@ -32,16 +24,20 @@
 {% endif %}
 
 {% if products != blank %}
-  <div id="cart-recommendations-root"
-       class="cart-recommendations-grid"
-       data-section-id="{{ section.id }}"
-       data-limit="{{ section.settings.limit | default: 4 }}">
+  <div
+    id="cart-recommendations-root"
+    class="cart-recommendations-grid"
+    data-section-id="{{ section.id }}"
+    data-limit="{{ section.settings.limit | default: 4 }}"
+    data-intent="{{ section.settings.intent | default: 'related' }}"
+  >
     {% for product in products %}
       {% render 'card-product',
         card_product: product,
         show_vendor: section.settings.show_vendor,
         show_quick_add: true,
-        section_id: section.id %}
+        section_id: section.id
+      %}
     {% endfor %}
   </div>
 {% else %}
@@ -70,62 +66,101 @@
   }
 </style>
 
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    console.log('cart recommendations script start');
+    const container = document.getElementById('cart-recommendations-root');
+    if (!container) return;
+    try {
+      // Load cart JSON to get first product ID
+      const cartResponse = await fetch('/cart.js');
+      if (!cartResponse.ok) return;
+      const cart = await cartResponse.json();
+      if (!Array.isArray(cart.items) || cart.items.length === 0) return;
+      const firstItem = cart.items[0];
+      const productId = firstItem.product_id;
 
-{% javascript %}
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('script start');
-  const container = document.getElementById('cart-recommendations-root');
-  if (!container) return;
-  try {
-    // 1️⃣  Load the cart JSON
-    const cartResponse = await fetch('/cart.js');
-    if (!cartResponse.ok) return;
-    const cart = await cartResponse.json();
-    if (!Array.isArray(cart.items) || cart.items.length === 0) return;
+      const sectionId = container.dataset.sectionId;
+      const limit = container.dataset.limit || 4;
+      const intent = container.dataset.intent || 'related';
+      console.log('Fetching recommendations', { sectionId, limit, intent, productId });
 
-    const firstItem = cart.items[0];
-    const productId = firstItem.product_id;
-    const firstCartProduct = firstItem;               // debug helper
-    console.log('firstCartProduct', firstCartProduct);
+      const url = new URL(window.location.origin + '/recommendations/products');
+      url.searchParams.set('intent', intent);
+      url.searchParams.set('product_id', productId);
+      url.searchParams.set('section_id', sectionId);
+      url.searchParams.set('limit', limit);
+      url.searchParams.set('format', 'json'); // Request JSON response
 
-    const sectionId = container.dataset.sectionId;   
-    const limit = container.dataset.limit || 4;       
-    console.log('sectionId', sectionId, 'limit', limit);
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error('Shopify error', response.status, errorBody);
+        return;
+      }
 
-    const url = new URL(window.location.origin + '/recommendations/products');
-    url.searchParams.set('intent', 'related');
-    url.searchParams.set('product_id', productId);
-    url.searchParams.set('section_id', sectionId);
-    url.searchParams.set('limit', limit); 
-    
-    console.log('🔗 Request URL →', url.toString());
+      const data = await response.json();
+      const products = data.products || [];
+      if (!products.length) {
+        console.warn('No recommendation products returned');
+        return;
+      }
+      console.log('recommendations products', products, sectionId, data);
+      for (const product of products) {
+        const productHtml = `
+          {% render 'card-product',
+            card_product: product,
+            show_vendor: false,
+            show_quick_add: false,
+            section_id: sectionId
+          %}
+        `;
+        container.insertAdjacentHTML('beforeend', productHtml);
+      }
+      const cardsHtml = products
+        .map((product) => {
+          const imageUrl = product.featured_image || '';
+          const price = product.price || '';
+          const title = product.title || '';
+          const productUrl = product.url || '#';
 
-    
-    const htmlResponse = await fetch(url.toString());
-    console.log('htmlResponse object', htmlResponse);
-   
-   
-    if (!htmlResponse.ok) {
-      const errorBody = await htmlResponse.text();
-      console.error('Shopify returned error:', htmlResponse.status, errorBody);
-      return;
+          return `
+    <div class="product-card-wrapper">
+      <div class="card">
+
+        <a href="${productUrl}" class="full-unstyled-link">
+
+          <img
+            src="${imageUrl}"
+            alt="${title}"
+            class="product-card-image"
+            loading="lazy"
+            width="100"
+            height="100"
+          />
+
+          <p class="product-card-title">
+            ${title}
+          </p>
+
+          <p class="product-card-price">
+            ${price}
+          </p>
+
+        </a>
+
+      </div>
+    </div>
+  `;
+        })
+        .join('');
+
+      container.innerHTML = cardsHtml;
+    } catch (error) {
+      console.error('Failed to load cart recommendations', error);
     }
-
-    const htmlText = await htmlResponse.text();
-    console.log('html response', htmlText);
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlText;
-
-    const sectionSelector = `[data-section-id="${sectionId}"]`;
-    const renderedSection = tempDiv.querySelector(sectionSelector) || tempDiv;
-    if (renderedSection && renderedSection.innerHTML.trim().length) {
-      container.innerHTML = renderedSection.innerHTML;
-    }
-  } catch (error) {
-    console.error('Failed to load cart recommendations', error);
-  }
-});
-{% endjavascript %}
+  });
+</script>
 
 {% schema %}
 {
@@ -158,10 +193,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       "label": "Fallback collection (e.g., Best sellers)"
     },
     {
-      "type": "checkbox",
-      "id": "show_vendor",
-      "label": "Show vendor name on cards",
-      "default": true
+      "type": "select",
+      "id": "intent",
+      "label": "Recommendation intent",
+      "options": [
+        { "value": "related", "label": "Related" },
+        { "value": "complementary", "label": "Complementary" }
+      ],
+      "default": "related"
     }
   ],
   "presets": [
