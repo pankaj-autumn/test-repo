@@ -60,7 +60,15 @@
       {% endif %}
     >
     <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
-      {{ value -}}
+ {%- assign downcase_option = option.name | downcase -%}
+      {%- if downcase_option == 'color' or downcase_option == 'colour' -%}
+        <!-- Show the color circle for color options -->
+        <span class="variant-swatch" style="background-color: {{ value | downcase }}; display: inline-block; width: 20px; height: 20px; border-radius: 50%; border: 1px solid #ccc; vertical-align: middle;"></span>
+        <span class="visually-hidden">{{ value }}</span>
+      {%- else -%}
+        <!-- Show regular text for size, material, etc. -->
+        {{ value }}
+      {%- endif -%}
       <span class="visually-hidden">{{ 'products.product.variant_sold_out_or_unavailable' | t }}</span>
     </label>
   {%- elsif block.settings.picker_type == 'dropdown' -%}

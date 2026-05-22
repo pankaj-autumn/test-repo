@@ -57,7 +57,10 @@
 
   <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
     <div class="grid__item product__media-wrapper{% if section.settings.media_position == 'right' %} medium-hide large-up-hide{% endif %}">
-      {% render 'product-media-gallery', variant_images: variant_images, custom_badge_position: section.settings.custom_badge_position %}
+      {% render 'product-media-gallery',
+        variant_images: variant_images,
+        custom_badge_position: section.settings.custom_badge_position
+      %}
     </div>
     <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}">
       <product-info
@@ -124,13 +127,18 @@
               >
                 {%- if product.selected_or_first_available_variant.inventory_management == 'shopify' -%}
                   {%- if product.selected_or_first_available_variant.inventory_quantity > 0 -%}
-                    {%- if product.selected_or_first_available_variant.inventory_quantity <= block.settings.inventory_threshold -%}
+                    {%- if product.selected_or_first_available_variant.inventory_quantity
+                        <= block.settings.inventory_threshold
+                    -%}
                       <svg width="15" height="15" aria-hidden="true">
                         <circle cx="7.5" cy="7.5" r="7.5" fill="rgb(238,148,65, 0.3)"/>
                         <circle cx="7.5" cy="7.5" r="5" stroke="rgb(255, 255, 255)" stroke-width="1" fill="rgb(238,148,65)"/>
                       </svg>
                       {%- if block.settings.show_inventory_quantity -%}
-                        {{- 'products.product.inventory_low_stock_show_count' | t: quantity: product.selected_or_first_available_variant.inventory_quantity -}}
+                        {{-
+                          'products.product.inventory_low_stock_show_count'
+                          | t: quantity: product.selected_or_first_available_variant.inventory_quantity
+                        -}}
                       {%- else -%}
                         {{- 'products.product.inventory_low_stock' | t -}}
                       {%- endif -%}
@@ -140,9 +148,12 @@
                         <circle cx="7.5" cy="7.5" r="5" stroke="rgb(255, 255, 255)" stroke-width="1" fill="rgb(62,214,96)"/>
                       </svg>
                       {%- if block.settings.show_inventory_quantity -%}
-                        {{- 'products.product.inventory_in_stock_show_count' | t: quantity: product.selected_or_first_available_variant.inventory_quantity -}}
+                        {{-
+                          'products.product.inventory_in_stock_show_count'
+                          | t: quantity: product.selected_or_first_available_variant.inventory_quantity
+                        -}}
                       {%- else -%}
-                          {{- 'products.product.inventory_in_stock' | t -}}
+                        {{- 'products.product.inventory_in_stock' | t -}}
                       {%- endif -%}
                     {%- endif -%}
                   {%- else -%}
@@ -168,6 +179,8 @@
                   {{ product.description }}
                 </div>
               {%- endif -%}
+
+              {% render 'product-bundle' %}
             {%- when 'sku' -%}
               <p
                 class="product__sku no-js-hidden{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}{% if product.selected_or_first_available_variant.sku.size == 0 %} visibility-hidden{% endif %}"
@@ -175,7 +188,8 @@
                 role="status"
                 {{ block.shopify_attributes }}
               >
-                <span class="visually-hidden">{{ 'products.product.sku' | t }}:</span> {{- product.selected_or_first_available_variant.sku -}}
+                <span class="visually-hidden">{{ 'products.product.sku' | t }}:</span>
+                {{- product.selected_or_first_available_variant.sku -}}
               </p>
             {%- when 'custom_liquid' -%}
               {{ block.settings.custom_liquid }}
@@ -223,7 +237,11 @@
                         </svg>
                       </span>
                     </span>
-                    <span>({{- 'products.product.quantity.in_cart_html' | t: quantity: cart_qty -}})</span>
+                    <span
+                      >(
+                      {{- 'products.product.quantity.in_cart_html' | t: quantity: cart_qty -}}
+                      )</span
+                    >
                   </span>
                 </label>
                 <quantity-input class="quantity">
@@ -248,7 +266,7 @@
                     step="{{ product.selected_or_first_available_variant.quantity_rule.increment }}"
                     value="{{ product.selected_or_first_available_variant.quantity_rule.min }}"
                     form="{{ product_form_id }}"
-                  />
+                  >
                   <button class="quantity__button no-js-hidden" name="plus" type="button">
                     <span class="visually-hidden">
                       {{- 'products.product.quantity.increase' | t: product: product.title | escape -}}
@@ -303,15 +321,18 @@
               </a>
             {%- when 'share' -%}
               {% assign share_url = product.selected_variant.url | default: product.url | prepend: request.origin %}
-              {% render 'share-button',
-                block: block,
-                share_link: share_url
-              %}
+              {% render 'share-button', block: block, share_link: share_url %}
 
             {%- when 'variant_picker' -%}
               {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
             {%- when 'buy_buttons' -%}
-              {%- render 'buy-buttons', block: block, product: product, product_form_id: product_form_id, section_id: section.id, show_pickup_availability: true -%}
+              {%- render 'buy-buttons',
+                block: block,
+                product: product,
+                product_form_id: product_form_id,
+                section_id: section.id,
+                show_pickup_availability: true
+              -%}
             {%- when 'rating' -%}
               {%- if product.metafields.reviews.rating.value != blank -%}
                 {% liquid
@@ -349,9 +370,18 @@
                 </p>
               {%- endif -%}
             {%- when 'complementary' -%}
-              <product-recommendations class="complementary-products quick-add-hidden no-js-hidden{% if block.settings.make_collapsible_row %} is-accordion{% endif %}{% if block.settings.enable_quick_add %} complementary-products-contains-quick-add{% endif %}" data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ block.settings.product_list_limit }}&intent=complementary">
+              <product-recommendations
+                class="complementary-products quick-add-hidden no-js-hidden{% if block.settings.make_collapsible_row %} is-accordion{% endif %}{% if block.settings.enable_quick_add %} complementary-products-contains-quick-add{% endif %}"
+                data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ block.settings.product_list_limit }}&intent=complementary"
+              >
                 {%- if recommendations.performed and recommendations.products_count > 0 -%}
-                  <aside aria-label="{{ 'accessibility.complementary_products' | t }}" {{ block.shopify_attributes }}{% if block.settings.make_collapsible_row %} class="product__accordion accordion"{% endif %}>
+                  <aside
+                    aria-label="{{ 'accessibility.complementary_products' | t }}"
+                    {{ block.shopify_attributes -}}
+                    {% if block.settings.make_collapsible_row %}
+                      class="product__accordion accordion"
+                    {% endif %}
+                  >
                     <div class="complementary-products__container">
                       {%- if block.settings.make_collapsible_row -%}
                         <details id="Details-{{ block.id }}-{{ section.id }}" open>
@@ -366,16 +396,39 @@
                         {%- endif -%}
                       </div>
                       {%- if block.settings.make_collapsible_row -%}
-                          {% render 'icon-caret' %}
+                        {% render 'icon-caret' %}
                         </summary>
                       {%- endif -%}
                       <slideshow-component class="slider-mobile-gutter">
-                        {%- assign number_of_slides = recommendations.products_count | plus: 0.0 | divided_by: block.settings.products_per_page | ceil -%}
-                        <div id="Slider-{{ block.id }}" class="contains-card contains-card--product complementary-slider grid grid--1-col slider slider--everywhere" role="list"{% if number_of_slides > 1 %} aria-label="{{ 'general.slider.name' | t }}"{% endif %}>
+                        {%- assign number_of_slides = recommendations.products_count
+                          | plus: 0.0
+                          | divided_by: block.settings.products_per_page
+                          | ceil
+                        -%}
+                        <div
+                          id="Slider-{{ block.id }}"
+                          class="contains-card contains-card--product complementary-slider grid grid--1-col slider slider--everywhere"
+                          role="list"
+                          {% if number_of_slides > 1 %}
+                            aria-label="{{ 'general.slider.name' | t }}"
+                          {% endif %}
+                        >
                           {%- for i in (1..number_of_slides) -%}
-                            <div id="Slide-{{ block.id }}-{{ forloop.index }}" class="complementary-slide complementary-slide--{{ settings.card_style }} grid__item slider__slide slideshow__slide" tabindex="-1" role="group"{% if number_of_slides > 1 %} aria-roledescription="{{ 'sections.slideshow.slide' | t }}" aria-label="{{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"{% endif %}>
+                            <div
+                              id="Slide-{{ block.id }}-{{ forloop.index }}"
+                              class="complementary-slide complementary-slide--{{ settings.card_style }} grid__item slider__slide slideshow__slide"
+                              tabindex="-1"
+                              role="group"
+                              {% if number_of_slides > 1 %}
+                                aria-roledescription="{{ 'sections.slideshow.slide' | t }}"
+                                aria-label="{{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
+                              {% endif %}
+                            >
                               <ul class="list-unstyled" role="list">
-                                {%- for product in recommendations.products limit: block.settings.products_per_page offset: continue -%}
+                                {%- for product in recommendations.products
+                                  limit: block.settings.products_per_page
+                                  offset: continue
+                                -%}
                                   <li>
                                     {% render 'card-product',
                                       card_product: product,
@@ -395,7 +448,14 @@
                         </div>
                         {%- if number_of_slides > 1 -%}
                           <div class="slider-buttons no-js-hidden">
-                            <button type="button" class="slider-button slider-button--prev" name="previous" aria-label="{{ 'general.slider.previous_slide' | t }}">{% render 'icon-caret' %}</button>
+                            <button
+                              type="button"
+                              class="slider-button slider-button--prev"
+                              name="previous"
+                              aria-label="{{ 'general.slider.previous_slide' | t }}"
+                            >
+                              {% render 'icon-caret' %}
+                            </button>
                             <div class="slider-counter slider-counter--{{ block.settings.pagination_style }}{% if block.settings.pagination_style == 'counter' or block.settings.pagination_style == 'numbers' %} caption{% endif %}">
                               {%- if block.settings.pagination_style == 'counter' -%}
                                 <span class="slider-counter--current">1</span>
@@ -405,14 +465,29 @@
                               {%- else -%}
                                 <div class="slideshow__control-wrapper">
                                   {%- for i in (1..number_of_slides) -%}
-                                    <button class="slider-counter__link slider-counter__link--{{ block.settings.pagination_style }} link" aria-label="{{ 'sections.slideshow.load_slide' | t }} {{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}" aria-controls="Slider-{{ block.id }}">
-                                      {%- if block.settings.pagination_style == 'numbers' -%}{{ forloop.index }}{% else %}<span class="dot"></span>{%- endif -%}
+                                    <button
+                                      class="slider-counter__link slider-counter__link--{{ block.settings.pagination_style }} link"
+                                      aria-label="{{ 'sections.slideshow.load_slide' | t }} {{ forloop.index }} {{ 'general.slider.of' | t }} {{ forloop.length }}"
+                                      aria-controls="Slider-{{ block.id }}"
+                                    >
+                                      {%- if block.settings.pagination_style == 'numbers' -%}
+                                        {{ forloop.index -}}
+                                      {%- else -%}
+                                        <span class="dot"></span>
+                                      {%- endif -%}
                                     </button>
                                   {%- endfor -%}
                                 </div>
                               {%- endif -%}
                             </div>
-                            <button type="button" class="slider-button slider-button--next" name="next" aria-label="{{ 'general.slider.next_slide' | t }}">{% render 'icon-caret' %}</button>
+                            <button
+                              type="button"
+                              class="slider-button slider-button--next"
+                              name="next"
+                              aria-label="{{ 'general.slider.next_slide' | t }}"
+                            >
+                              {% render 'icon-caret' %}
+                            </button>
                           </div>
                         {%- endif -%}
                       </slideshow-component>
@@ -430,9 +505,7 @@
                 {%- endif -%}
               </product-recommendations>
             {%- when 'icon-with-text' -%}
-              {% render 'icon-with-text',
-                block: block
-              %}
+              {% render 'icon-with-text', block: block %}
           {%- endcase -%}
         {%- endfor -%}
         <a href="{{ product.url }}" class="link product__view-details animate-arrow">
@@ -444,12 +517,16 @@
     {%- if section.settings.media_position == 'right' -%}
       {% comment %} Duplicate gallery to display after product content on tablet/desktop breakpoint {% endcomment %}
       <div class="grid__item product__media-wrapper small-hide">
-        {% render 'product-media-gallery', variant_images: variant_images, is_duplicate: true, custom_badge_position: section.settings.custom_badge_position %}
+        {% render 'product-media-gallery',
+          variant_images: variant_images,
+          is_duplicate: true,
+          custom_badge_position: section.settings.custom_badge_position
+        %}
       </div>
     {%- endif -%}
   </div>
 
-  {% render 'product-media-modal' variant_images: variant_images %}
+  {% render 'product-media-modal', variant_images: variant_images %}
 
   {% assign popups = section.blocks | where: 'type', 'popup' %}
   {%- for block in popups -%}
@@ -698,7 +775,7 @@
       "name": "t:sections.main-product.blocks.quantity_selector.name",
       "limit": 1
     },
-    
+
     {
       "type": "variant_picker",
       "name": "t:sections.main-product.blocks.variant_picker.name",
@@ -2041,7 +2118,7 @@
       "default": "hide",
       "label": "t:sections.main-product.settings.mobile_thumbnails.label"
     },
-     {
+    {
       "type": "select",
       "id": "custom_badge_position",
       "options": [

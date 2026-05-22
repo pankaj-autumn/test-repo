@@ -16,6 +16,12 @@
         "padding_bottom": 36
       }
     },
+    "cart-recommendations": {
+      "type": "cart-recommendations",
+      "settings": {
+        "fallback_collection": "ln-grand-collectin"
+      }
+    },
     "cart-footer": {
       "type": "main-cart-footer",
       "blocks": {
@@ -28,15 +34,9 @@
           "settings": {}
         }
       },
-      "block_order": [
-        "subtotal",
-        "buttons"
-      ],
+      "block_order": ["subtotal", "buttons"],
       "settings": {}
     }
   },
-  "order": [
-    "cart-items",
-    "cart-footer"
-  ]
+  "order": ["cart-items", "cart-recommendations", "cart-footer"]
 }

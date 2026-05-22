@@ -162,9 +162,7 @@
           }
         }
       },
-      "block_order": [
-        "collapsible_row_XH6Q4X"
-      ],
+      "block_order": ["collapsible_row_XH6Q4X"],
       "name": "t:sections.collapsible_content.presets.name",
       "settings": {
         "caption": "Faq section",

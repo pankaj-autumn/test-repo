@@ -1,0 +1,202 @@
+{% comment %}
+  Check if the metafield exists and has a value before trying to render anything.
+{% endcomment %}
+
+{% if product.metafields.custom.bundle_products.value %}
+  {% comment %} Store the main product's base price for JS calculations {% endcomment %}
+  <div
+    id="main-product-data"
+    data-price="{{ product.selected_or_first_available_variant.price }}"
+    style="display: none;"
+  ></div>
+
+  <div class="custom-product-bundle" style="margin-top: 30px;">
+    <h3 style="font-size: 16px; margin-bottom: 15px;">Goes Well With</h3>
+
+    <ul class="bundle_item_list" style="list-style: none; padding: 0;">
+      {% for bundle_item in product.metafields.custom.bundle_products.value %}
+        <li class="bundle_item" style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
+          {% comment %} 1. The Checkbox {% endcomment %}
+          <input type="checkbox" class="bundle-checkbox" checked style="margin-top: 5px;">
+
+          {% comment %} 2. The Image {% endcomment %}
+          <div class="bundle_item_img" style="flex-shrink: 0;">
+            <img
+              src="{{ bundle_item.featured_image | img_url: 'compact' }}"
+              alt="{{ bundle_item.title }}"
+              width="80"
+              height="80"
+              loading="lazy"
+              style="border-radius: 4px;"
+            >
+          </div>
+
+          {% comment %} 3. The Details & Variant Dropdown {% endcomment %}
+          <div class="bundle_item_details" style="flex-grow: 1;">
+            <div style="font-weight: bold; margin-bottom: 5px;">
+              {{ bundle_item.title | link_to: bundle_item.url }}
+            </div>
+
+            {% comment %} If the product has variants, show a dropdown. If not, just store the first variant ID secretly {% endcomment %}
+            {% if bundle_item.variants.size > 1 %}
+              <select
+                class="bundle-variant-select"
+                style="width: 100%; padding: 8px; margin-bottom: 5px; border: 1px solid #ccc;"
+              >
+                {% for variant in bundle_item.variants %}
+                  <option value="{{ variant.id }}" data-price="{{ variant.price }}">
+                    {{ variant.title }}
+                  </option>
+                {% endfor %}
+              </select>
+            {% else %}
+              <input
+                type="hidden"
+                class="bundle-variant-select"
+                value="{{ bundle_item.variants.first.id }}"
+                data-price="{{ bundle_item.variants.first.price }}"
+              >
+            {% endif %}
+
+            <div class="bundle_item_price" style="color: #555;">
+              {{ bundle_item.price | money }}
+            </div>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    {% comment %} 4. The Total Price & Button {% endcomment %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
+      <div>
+        <span style="font-size: 12px; text-transform: uppercase; color: #777;">Total Price of Bundle</span>
+        <div id="bundle-total-price" style="font-size: 18px; font-weight: bold;">
+          <!-- JS will fill this in -->
+        </div>
+      </div>
+      <button
+        id="add-bundle-to-cart"
+        type="button"
+        class="button button--primary"
+        style="background-color: #f0a35c; color: white; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer;"
+      >
+        ADD ITEMS
+      </button>
+    </div>
+  </div>
+
+  <script>
+            document.addEventListener('DOMContentLoaded', function() {
+              const bundleCheckboxes = document.querySelectorAll('.bundle-checkbox');
+              const variantSelects = document.querySelectorAll('.bundle-variant-select');
+              const totalPriceDisplay = document.getElementById('bundle-total-price');
+              const addToCartButton = document.getElementById('add-bundle-to-cart');
+
+              // 1. Function to calculate and display the total price
+                const mainProductDataElement = document.getElementById('main-product-data');
+                console.log(mainProductDataElement.getAttribute('data-price'));
+                const mainProductBasePrice = parseInt(mainProductDataElement.getAttribute('data-price') || 0);
+
+              // Function to dynamically find the currently selected Variant ID of the MAIN product
+              function getMainProductVariantId() {
+                // Most Shopify themes store the current variant ID in an input named 'id' inside the cart form
+                const mainVariantInput = document.querySelector('form[action*="/cart/add"] [name="id"]');
+                return mainVariantInput ? parseInt(mainVariantInput.value) : {{ product.selected_or_first_available_variant.id }};
+              }
+
+              function updateTotalPrice() {
+                let totalCents = mainProductBasePrice;
+
+                // Loop through all checkboxes to see which are checked
+                bundleCheckboxes.forEach(function(checkbox) {
+                  if (checkbox.checked) {
+                    // Find the dropdown/hidden input that belongs to this specific checkbox
+                    const listItem = checkbox.closest('.bundle_item');
+                    const selectElement = listItem.querySelector('.bundle-variant-select');
+
+                    // If it's a dropdown, we need the price of the currently selected option
+                    let priceCents = 0;
+                    if (selectElement.tagName === 'SELECT') {
+                      const selectedOption = selectElement.options[selectElement.selectedIndex];
+                      priceCents = parseInt(selectedOption.getAttribute('data-price') || 0);
+                    } else {
+                      // It's a hidden input (no variants)
+                      priceCents = parseInt(selectElement.getAttribute('data-price') || 0);
+                    }
+
+                    totalCents += priceCents;
+                  }
+                });
+
+                // Format cents into dollars (e.g., 8500 -> $85.00)
+                const formatter = new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: 'USD',
+                });
+                totalPriceDisplay.textContent = formatter.format(totalCents / 100);
+              }
+
+              // 2. Add event listeners so price updates instantly on user interaction
+              bundleCheckboxes.forEach(box => box.addEventListener('change', updateTotalPrice));
+              variantSelects.forEach(select => select.addEventListener('change', updateTotalPrice));
+
+              // 3. Run the calculation once immediately on page load
+              updateTotalPrice();
+
+              // 4. Handle the Add to Cart button click
+              addToCartButton.addEventListener('click', function(event) {
+                event.preventDefault();
+                addToCartButton.textContent = 'Adding...';
+
+                let itemsToAdd = [];
+
+                const mainVariantId = getMainProductVariantId();
+                itemsToAdd.push({
+                  id: mainVariantId,
+                  quantity: 1
+                });
+
+                // Only gather data from CHECKED boxes
+                bundleCheckboxes.forEach(function(checkbox) {
+                  if (checkbox.checked) {
+                    const listItem = checkbox.closest('.bundle_item');
+                    const selectElement = listItem.querySelector('.bundle-variant-select');
+
+                    itemsToAdd.push({
+                      id: parseInt(selectElement.value),
+                      quantity: 1
+                    });
+                  }
+                });
+
+            // 5. Send to Cart API
+            
+   fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ 
+        items: itemsToAdd, 
+        sections: ["cart-drawer","cart-icon-bubble"], 
+        sections_url : window.location.pathname 
+      })
+    }).then( (response) => response.json())
+      .then((result) => {
+        console.log(result);
+        const cartDrawer = document.querySelector('cart-drawer');
+
+    if(cartDrawer && result.sections){
+      cartDrawer.renderContents(result);
+    }
+  }).catch((error) => {
+    console.error('Error:', error);
+  });
+  
+  
+  
+
+            });
+          });
+  </script>
+{% endif %}

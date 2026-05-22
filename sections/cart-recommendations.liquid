@@ -1,0 +1,173 @@
+{% comment %}
+  Cart recommendations section.
+  Expects to be rendered through the /recommendations/products endpoint,
+  so that the global `recommendations` object is populated by Shopify.
+
+  It shows up to `section.settings.limit` recommended products, and
+  falls back to a manual collection if there are no recommendations.
+{% endcomment %}
+
+{% assign limit = section.settings.limit | default: 4 %}
+
+{% if section.settings.heading != blank %}
+  <h2 class="cart-recommendations-heading">
+    {{ section.settings.heading }}
+  </h2>
+{% endif %}
+
+{%- comment -%}
+  Primary data source: recommendations.products
+{%- endcomment -%}
+
+{% assign products = recommendations.products | slice: 0, limit %}
+
+{%- comment -%}
+  Fallback: if no recommendation products, use a configured collection.
+{%- endcomment -%}
+{% if products == blank and section.settings.fallback_collection != blank %}
+  {% assign fallback_collection = collections[section.settings.fallback_collection] %}
+  {% if fallback_collection %}
+    {% assign products = fallback_collection.products | slice: 0, limit %}
+  {% endif %}
+{% endif %}
+
+{% if products != blank %}
+  <div id="cart-recommendations-root"
+       class="cart-recommendations-grid"
+       data-section-id="{{ section.id }}"
+       data-limit="{{ section.settings.limit | default: 4 }}">
+    {% for product in products %}
+      {% render 'card-product',
+        card_product: product,
+        show_vendor: section.settings.show_vendor,
+        show_quick_add: true,
+        section_id: section.id %}
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="cart-recommendations-empty">
+    {{ section.settings.fallback_heading | default: 'No recommendations available' }}
+  </p>
+{% endif %}
+
+<style>
+  .cart-recommendations-heading {
+    font-size: 1.5rem;
+    margin: 1.5rem 0 1rem;
+    text-align: center;
+  }
+
+  .cart-recommendations-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    margin-bottom: 2rem;
+  }
+
+  .cart-recommendations-empty {
+    text-align: center;
+    margin: 1.5rem 0 2rem;
+  }
+</style>
+
+
+{% javascript %}
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('script start');
+  const container = document.getElementById('cart-recommendations-root');
+  if (!container) return;
+  try {
+    // 1️⃣  Load the cart JSON
+    const cartResponse = await fetch('/cart.js');
+    if (!cartResponse.ok) return;
+    const cart = await cartResponse.json();
+    if (!Array.isArray(cart.items) || cart.items.length === 0) return;
+
+    const firstItem = cart.items[0];
+    const productId = firstItem.product_id;
+    const firstCartProduct = firstItem;               // debug helper
+    console.log('firstCartProduct', firstCartProduct);
+
+    const sectionId = container.dataset.sectionId;   
+    const limit = container.dataset.limit || 4;       
+    console.log('sectionId', sectionId, 'limit', limit);
+
+    const url = new URL(window.location.origin + '/recommendations/products');
+    url.searchParams.set('intent', 'related');
+    url.searchParams.set('product_id', productId);
+    url.searchParams.set('section_id', sectionId);
+    url.searchParams.set('limit', limit); 
+    
+    console.log('🔗 Request URL →', url.toString());
+
+    
+    const htmlResponse = await fetch(url.toString());
+    console.log('htmlResponse object', htmlResponse);
+   
+   
+    if (!htmlResponse.ok) {
+      const errorBody = await htmlResponse.text();
+      console.error('Shopify returned error:', htmlResponse.status, errorBody);
+      return;
+    }
+
+    const htmlText = await htmlResponse.text();
+    console.log('html response', htmlText);
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlText;
+
+    const sectionSelector = `[data-section-id="${sectionId}"]`;
+    const renderedSection = tempDiv.querySelector(sectionSelector) || tempDiv;
+    if (renderedSection && renderedSection.innerHTML.trim().length) {
+      container.innerHTML = renderedSection.innerHTML;
+    }
+  } catch (error) {
+    console.error('Failed to load cart recommendations', error);
+  }
+});
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Cart recommendations",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Section heading",
+      "default": "You may also like"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Number of products to show",
+      "min": 1,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "fallback_heading",
+      "label": "Fallback heading",
+      "default": "You may also like"
+    },
+    {
+      "type": "collection",
+      "id": "fallback_collection",
+      "label": "Fallback collection (e.g., Best sellers)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor name on cards",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cart recommendations"
+    }
+  ]
+}
+{% endschema %}
