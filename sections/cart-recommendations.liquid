@@ -8,167 +8,285 @@
 {% endcomment %}
 
 {%- if cart.item_count > 0 -%}
-{% assign limit = section.settings.limit | default: 4 %}
+  {% assign limit = section.settings.limit | default: 4 %}
 
-{% if section.settings.heading != blank %}
-  <h2 class="cart-recommendations-heading">
-    {{ section.settings.heading }}
-  </h2>
-{% endif %}
-
-{% assign products = recommendations.products | slice: 0, limit %}
-{% if products == blank and section.settings.fallback_collection != blank %}
-  {% assign fallback_collection = collections[section.settings.fallback_collection] %}
-  {% if fallback_collection %}
-    {% assign products = fallback_collection.products | slice: 0, limit %}
+  {% if section.settings.heading != blank %}
+    <h2 class="cart-recommendations-heading">
+      {{ section.settings.heading }}
+    </h2>
   {% endif %}
-{% endif %}
 
-{% if products != blank %}
-  <div
-    id="cart-recommendations-root"
-    class="cart-recommendations-grid"
-    data-section-id="{{ section.id }}"
-    data-limit="{{ section.settings.limit | default: 4 }}"
-    data-intent="{{ section.settings.intent | default: 'related' }}"
-  >
-    {% for product in products %}
-      {% render 'card-product',
-        card_product: product,
-        show_vendor: section.settings.show_vendor,
-        show_quick_add: true,
-        section_id: section.id
-      %}
-    {% endfor %}
-  </div>
-{% else %}
-  <p class="cart-recommendations-empty">
-    {{ section.settings.fallback_heading | default: 'No recommendations available' }}
-  </p>
-{% endif %}
+  {% assign products = recommendations.products | slice: 0, limit %}
+  {% if products == blank and section.settings.fallback_collection != blank %}
+    {% assign fallback_collection = collections[section.settings.fallback_collection] %}
+    {% if fallback_collection %}
+      {% assign products = fallback_collection.products | slice: 0, limit %}
+    {% endif %}
+  {% endif %}
 
-<style>
-  .cart-recommendations-heading {
-    font-size: 1.5rem;
-    margin: 1.5rem 0 1rem;
-    text-align: center;
-  }
-
-  .cart-recommendations-grid {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    margin-bottom: 2rem;
-  }
-
-  .cart-recommendations-empty {
-    text-align: center;
-    margin: 1.5rem 0 2rem;
-  }
-
-  /* Dynamic CSS: Hide section when the cart becomes empty */
-  body:has(cart-items.is-empty) .cart-recommendations-heading,
-  body:has(cart-items.is-empty) #cart-recommendations-root,
-  body:has(cart-items.is-empty) .cart-recommendations-empty {
-    display: none !important;
-  }
-</style>
-
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    console.log('cart recommendations script start');
-    const container = document.getElementById('cart-recommendations-root');
-    if (!container) return;
-    try {
-      // Load cart JSON to get first product ID
-      const cartResponse = await fetch('/cart.js');
-      if (!cartResponse.ok) return;
-      const cart = await cartResponse.json();
-      if (!Array.isArray(cart.items) || cart.items.length === 0) return;
-      const firstItem = cart.items[0];
-      const productId = firstItem.product_id;
-
-      const sectionId = container.dataset.sectionId;
-      const limit = container.dataset.limit || 4;
-      const intent = container.dataset.intent || 'related';
-      console.log('Fetching recommendations', { sectionId, limit, intent, productId });
-
-      const url = new URL(window.location.origin + '/recommendations/products');
-      url.searchParams.set('intent', intent);
-      url.searchParams.set('product_id', productId);
-      url.searchParams.set('section_id', sectionId);
-      url.searchParams.set('limit', limit);
-      url.searchParams.set('format', 'json'); // Request JSON response
-
-      const response = await fetch(url.toString());
-      if (!response.ok) {
-        const errorBody = await response.text();
-        console.error('Shopify error', response.status, errorBody);
-        return;
-      }
-
-      const data = await response.json();
-      const products = data.products || [];
-      if (!products.length) {
-        console.warn('No recommendation products returned');
-        return;
-      }
-      console.log('recommendations products', products, sectionId, data);
-      for (const product of products) {
-        const productHtml = `
-          {% render 'card-product',
-            card_product: product,
-            show_vendor: false,
-            show_quick_add: false,
-            section_id: sectionId
-          %}
-        `;
-        container.insertAdjacentHTML('beforeend', productHtml);
-      }
-      const cardsHtml = products
-        .map((product) => {
-          const imageUrl = product.featured_image || '';
-          const price = product.price || '';
-          const title = product.title || '';
-          const productUrl = product.url || '#';
-
-          return `
-    <div class="product-card-wrapper">
-      <div class="card">
-
-        <a href="${productUrl}" class="full-unstyled-link">
-
-          <img
-            src="${imageUrl}"
-            alt="${title}"
-            class="product-card-image"
-            loading="lazy"
-            width="100"
-            height="100"
-          />
-
-          <p class="product-card-title">
-            ${title}
-          </p>
-
-          <p class="product-card-price">
-            ${price}
-          </p>
-
-        </a>
-
-      </div>
+  {% if products != blank %}
+    <div
+      id="cart-recommendations-root"
+      class="cart-recommendations-grid"
+      data-section-id="{{ section.id }}"
+      data-limit="{{ section.settings.limit | default: 4 }}"
+      data-intent="{{ section.settings.intent | default: 'related' }}"
+      data-show-vendor="{{ section.settings.show_vendor | default: true }}"
+    >
+      {% for product in products %}
+        {% render 'card-product',
+          card_product: product,
+          show_vendor: section.settings.show_vendor,
+          show_quick_add: true,
+          section_id: section.id
+        %}
+      {% endfor %}
     </div>
-  `;
-        })
-        .join('');
+  {% else %}
+    <p class="cart-recommendations-empty">
+      {{ section.settings.fallback_heading | default: 'No recommendations available' }}
+    </p>
+  {% endif %}
 
-      container.innerHTML = cardsHtml;
-    } catch (error) {
-      console.error('Failed to load cart recommendations', error);
+  <style>
+    .cart-recommendations-heading {
+      font-size: 1.6rem;
+      font-weight: 600;
+      letter-spacing: 0.05rem;
+      margin: 2.5rem 0 1.5rem;
+      text-align: center;
+      color: #121212;
+      text-transform: uppercase;
     }
-  });
-</script>
+
+    .cart-recommendations-grid {
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      margin-bottom: 3rem;
+      padding: 0 1rem;
+    }
+
+    .cart-recommendations-empty {
+      text-align: center;
+      margin: 2rem 0 3rem;
+      color: #666;
+      font-style: italic;
+    }
+
+    /* Premium Glassmorphic Card Styling */
+    .cart-rec-card-wrapper {
+      opacity: 0;
+      transform: translateY(10px);
+      animation: cartRecFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cartRecFadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .cart-rec-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  border-color 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .cart-rec-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      border-color: rgba(240, 163, 92, 0.4);
+    }
+
+    .cart-rec-card__image-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 100%;
+      background-color: #f5f5f5;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .cart-rec-card__image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .cart-rec-card:hover .cart-rec-card__image {
+      transform: scale(1.06);
+    }
+
+    .cart-rec-card__info {
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      justify-content: space-between;
+    }
+
+    .cart-rec-card__vendor {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #777;
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .cart-rec-card__title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin: 0 0 0.8rem 0;
+      color: #1b1b1b;
+      word-break: break-word;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      height: 3.64rem;
+    }
+
+    .cart-rec-card__price-wrapper {
+      margin-top: auto;
+    }
+
+    .cart-rec-card__price {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f0a35c;
+    }
+
+    /* Dynamic CSS: Hide section when the cart becomes empty */
+    body:has(cart-items.is-empty) .cart-recommendations-heading,
+    body:has(cart-items.is-empty) #cart-recommendations-root,
+    body:has(cart-items.is-empty) .cart-recommendations-empty {
+      display: none !important;
+    }
+  </style>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('cart recommendations script start');
+      const container = document.getElementById('cart-recommendations-root');
+      if (!container) return;
+      try {
+        // Load cart JSON to get first product ID
+        const cartResponse = await fetch('/cart.js');
+        if (!cartResponse.ok) return;
+        const cart = await cartResponse.json();
+        if (!Array.isArray(cart.items) || cart.items.length === 0) return;
+        const firstItem = cart.items[0];
+        const productId = firstItem.product_id;
+
+        const sectionId = container.dataset.sectionId;
+        const limit = container.dataset.limit || 4;
+        const intent = container.dataset.intent || 'related';
+        const showVendor = container.dataset.showVendor === 'true';
+        console.log('Fetching recommendations', { sectionId, limit, intent, productId });
+
+        const url = new URL(window.location.origin + '/recommendations/products');
+        url.searchParams.set('intent', intent);
+        url.searchParams.set('product_id', productId);
+        url.searchParams.set('section_id', sectionId);
+        url.searchParams.set('limit', limit);
+        url.searchParams.set('format', 'json');
+
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+          const errorBody = await response.text();
+          console.error('Shopify error', response.status, errorBody);
+          return;
+        }
+
+        const data = await response.json();
+        const products = data.products || [];
+        if (!products.length) {
+          console.warn('No recommendation products returned');
+          return;
+        }
+        console.log('recommendations products', products, sectionId, data);
+
+        const formatPrice = (cents) => {
+          return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          }).format(cents / 100);
+        };
+
+        const cardsHtml = products
+          .map((product, index) => {
+            const imageUrl = product.featured_image || 'https://cdn.shopify.com/s/images/layout/placeholder-image.gif';
+            const price = formatPrice(product.price || 0);
+            const title = product.title || 'Untitled Product';
+            const productUrl = product.url || '#';
+            const vendor = product.vendor || '';
+
+            const vendorHtml = showVendor && vendor
+              ? `<div class="cart-rec-card__vendor">${vendor}</div>`
+              : '';
+
+            const delay = index * 0.1;
+
+            return `
+              <div class="cart-rec-card-wrapper" style="animation-delay: ${delay}s;">
+                <div class="cart-rec-card">
+                  <a href="${productUrl}" class="full-unstyled-link" style="display: flex; flex-direction: column; height: 100%; text-decoration: none;">
+                    <div class="cart-rec-card__image-container">
+                      <img
+                        src="${imageUrl}"
+                        alt="${title}"
+                        class="cart-rec-card__image"
+                        loading="lazy"
+                        width="180"
+                        height="180"
+                      />
+                    </div>
+
+                    <div class="cart-rec-card__info">
+                      <div>
+                        ${vendorHtml}
+                        <h3 class="cart-rec-card__title">
+                          ${title}
+                        </h3>
+                      </div>
+
+                      <div class="cart-rec-card__price-wrapper">
+                        <span class="cart-rec-card__price">
+                          ${price}
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+
+        container.innerHTML = cardsHtml;
+      } catch (error) {
+        console.error('Failed to load cart recommendations', error);
+      }
+    });
+  </script>
 {%- endif -%}
 
 {% schema %}
@@ -200,6 +318,12 @@
       "type": "collection",
       "id": "fallback_collection",
       "label": "Fallback collection (e.g., Best sellers)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor name on cards",
+      "default": true
     },
     {
       "type": "select",

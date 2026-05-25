@@ -85,118 +85,126 @@
   </div>
 
   <script>
-            document.addEventListener('DOMContentLoaded', function() {
-              const bundleCheckboxes = document.querySelectorAll('.bundle-checkbox');
-              const variantSelects = document.querySelectorAll('.bundle-variant-select');
-              const totalPriceDisplay = document.getElementById('bundle-total-price');
-              const addToCartButton = document.getElementById('add-bundle-to-cart');
+              document.addEventListener('DOMContentLoaded', function() {
+                const bundleCheckboxes = document.querySelectorAll('.bundle-checkbox');
+                const variantSelects = document.querySelectorAll('.bundle-variant-select');
+                const totalPriceDisplay = document.getElementById('bundle-total-price');
+                const addToCartButton = document.getElementById('add-bundle-to-cart');
 
-              // 1. Function to calculate and display the total price
-                const mainProductDataElement = document.getElementById('main-product-data');
-                console.log(mainProductDataElement.getAttribute('data-price'));
-                const mainProductBasePrice = parseInt(mainProductDataElement.getAttribute('data-price') || 0);
+                // 1. Function to calculate and display the total price
+                  const mainProductDataElement = document.getElementById('main-product-data');
+                  console.log(mainProductDataElement.getAttribute('data-price'));
+                  const mainProductBasePrice = parseInt(mainProductDataElement.getAttribute('data-price') || 0);
 
-              // Function to dynamically find the currently selected Variant ID of the MAIN product
-              function getMainProductVariantId() {
-                // Most Shopify themes store the current variant ID in an input named 'id' inside the cart form
-                const mainVariantInput = document.querySelector('form[action*="/cart/add"] [name="id"]');
-                return mainVariantInput ? parseInt(mainVariantInput.value) : {{ product.selected_or_first_available_variant.id }};
-              }
+                // Function to dynamically find the currently selected Variant ID of the MAIN product
+                function getMainProductVariantId() {
+                  // Most Shopify themes store the current variant ID in an input named 'id' inside the cart form
+                  const mainVariantInput = document.querySelector('form[action*="/cart/add"] [name="id"]');
+                  return mainVariantInput ? parseInt(mainVariantInput.value) : {{ product.selected_or_first_available_variant.id }};
+                }
 
-              function updateTotalPrice() {
-                let totalCents = mainProductBasePrice;
+                function updateTotalPrice() {
+                  let totalCents = mainProductBasePrice;
 
-                // Loop through all checkboxes to see which are checked
-                bundleCheckboxes.forEach(function(checkbox) {
-                  if (checkbox.checked) {
-                    // Find the dropdown/hidden input that belongs to this specific checkbox
-                    const listItem = checkbox.closest('.bundle_item');
-                    const selectElement = listItem.querySelector('.bundle-variant-select');
+                  // Loop through all checkboxes to see which are checked
+                  bundleCheckboxes.forEach(function(checkbox) {
+                    if (checkbox.checked) {
+                      // Find the dropdown/hidden input that belongs to this specific checkbox
+                      const listItem = checkbox.closest('.bundle_item');
+                      const selectElement = listItem.querySelector('.bundle-variant-select');
 
-                    // If it's a dropdown, we need the price of the currently selected option
-                    let priceCents = 0;
-                    if (selectElement.tagName === 'SELECT') {
-                      const selectedOption = selectElement.options[selectElement.selectedIndex];
-                      priceCents = parseInt(selectedOption.getAttribute('data-price') || 0);
-                    } else {
-                      // It's a hidden input (no variants)
-                      priceCents = parseInt(selectElement.getAttribute('data-price') || 0);
+                      // If it's a dropdown, we need the price of the currently selected option
+                      let priceCents = 0;
+                      if (selectElement.tagName === 'SELECT') {
+                        const selectedOption = selectElement.options[selectElement.selectedIndex];
+                        priceCents = parseInt(selectedOption.getAttribute('data-price') || 0);
+                      } else {
+                        // It's a hidden input (no variants)
+                        priceCents = parseInt(selectElement.getAttribute('data-price') || 0);
+                      }
+
+                      totalCents += priceCents;
                     }
+                  });
 
-                    totalCents += priceCents;
-                  }
-                });
+                  // Format cents into dollars (e.g., 8500 -> $85.00)
+                  const formatter = new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                  });
+                  totalPriceDisplay.textContent = formatter.format(totalCents / 100);
+                }
 
-                // Format cents into dollars (e.g., 8500 -> $85.00)
-                const formatter = new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
-                });
-                totalPriceDisplay.textContent = formatter.format(totalCents / 100);
-              }
+                // 2. Add event listeners so price updates instantly on user interaction
+                bundleCheckboxes.forEach(box => box.addEventListener('change', updateTotalPrice));
+                variantSelects.forEach(select => select.addEventListener('change', updateTotalPrice));
 
-              // 2. Add event listeners so price updates instantly on user interaction
-              bundleCheckboxes.forEach(box => box.addEventListener('change', updateTotalPrice));
-              variantSelects.forEach(select => select.addEventListener('change', updateTotalPrice));
+                // 3. Run the calculation once immediately on page load
+                updateTotalPrice();
 
-              // 3. Run the calculation once immediately on page load
-              updateTotalPrice();
+                // 4. Handle the Add to Cart button click
+                addToCartButton.addEventListener('click', function(event) {
+                  event.preventDefault();
+                  addToCartButton.textContent = 'Adding...';
 
-              // 4. Handle the Add to Cart button click
-              addToCartButton.addEventListener('click', function(event) {
-                event.preventDefault();
-                addToCartButton.textContent = 'Adding...';
+                  const bundleId = 'bundle_' + Date.now();
+                  let itemsToAdd = [];
 
-                let itemsToAdd = [];
+                  const mainVariantId = getMainProductVariantId();
+                  itemsToAdd.push({
+                    id: mainVariantId,
+                    quantity: 1,
+                    properties: {
+                      '_bundle_id': bundleId,
+                      '_is_parent': 'true'
+                    }
+                  });
 
-                const mainVariantId = getMainProductVariantId();
-                itemsToAdd.push({
-                  id: mainVariantId,
-                  quantity: 1
-                });
+                  // Only gather data from CHECKED boxes
+                  bundleCheckboxes.forEach(function(checkbox) {
+                    if (checkbox.checked) {
+                      const listItem = checkbox.closest('.bundle_item');
+                      const selectElement = listItem.querySelector('.bundle-variant-select');
 
-                // Only gather data from CHECKED boxes
-                bundleCheckboxes.forEach(function(checkbox) {
-                  if (checkbox.checked) {
-                    const listItem = checkbox.closest('.bundle_item');
-                    const selectElement = listItem.querySelector('.bundle-variant-select');
+                      itemsToAdd.push({
+                        id: parseInt(selectElement.value),
+                        quantity: 1,
+                        properties: {
+                          '_bundle_id': bundleId
+                        }
+                      });
+                    }
+                  });
 
-                    itemsToAdd.push({
-                      id: parseInt(selectElement.value),
-                      quantity: 1
-                    });
-                  }
-                });
+              // 5. Send to Cart API
 
-            // 5. Send to Cart API
-            
-   fetch('/cart/add.js', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ 
-        items: itemsToAdd, 
-        sections: ["cart-drawer","cart-icon-bubble"], 
-        sections_url : window.location.pathname 
-      })
-    }).then( (response) => response.json())
-      .then((result) => {
-        console.log(result);
-        const cartDrawer = document.querySelector('cart-drawer');
+     fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          items: itemsToAdd,
+          sections: ["cart-drawer","cart-icon-bubble"],
+          sections_url : window.location.pathname
+        })
+      }).then( (response) => response.json())
+        .then((result) => {
+          console.log(result);
+          const cartDrawer = document.querySelector('cart-drawer');
 
-    if(cartDrawer && result.sections){
-      cartDrawer.renderContents(result);
-    }
-  }).catch((error) => {
-    console.error('Error:', error);
-  });
-  
-  
-  
+      if(cartDrawer && result.sections){
+        cartDrawer.renderContents(result);
+      }
+    }).catch((error) => {
+      console.error('Error:', error);
+    });
 
+
+
+
+              });
             });
-          });
   </script>
 {% endif %}

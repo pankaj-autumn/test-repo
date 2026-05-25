@@ -210,3 +210,135 @@ if (!customElements.get('cart-note')) {
       }
   });
 };
+
+// --- AUTO-REMOVE BUNDLED PRODUCTS ON PARENT REMOVAL ---
+window.isCleaningCart = false;
+
+function getCartSectionsToRender() {
+  const sections = [];
+  const mainCartItems = document.getElementById('main-cart-items');
+  const cartDrawer = document.getElementById('CartDrawer');
+  
+  if (mainCartItems) {
+    sections.push({
+      id: 'main-cart-items',
+      section: mainCartItems.dataset.id || 'main-cart-items',
+      selector: '.js-contents'
+    });
+    const mainCartFooter = document.getElementById('main-cart-footer');
+    if (mainCartFooter) {
+      sections.push({
+        id: 'main-cart-footer',
+        section: mainCartFooter.dataset.id || 'main-cart-footer',
+        selector: '.js-contents'
+      });
+    }
+    sections.push({
+      id: 'cart-live-region-text',
+      section: 'cart-live-region-text',
+      selector: '.shopify-section'
+    });
+  }
+  
+  if (cartDrawer) {
+    sections.push({
+      id: 'CartDrawer',
+      section: 'cart-drawer',
+      selector: '.drawer__inner'
+    });
+  }
+  
+  sections.push({
+    id: 'cart-icon-bubble',
+    section: 'cart-icon-bubble',
+    selector: '.shopify-section'
+  });
+  
+  return sections;
+}
+
+function renderCartSections(parsedState, sections) {
+  sections.forEach((section) => {
+    const elementToReplace =
+      document.getElementById(section.id)?.querySelector(section.selector) || document.getElementById(section.id);
+    if (elementToReplace && parsedState.sections?.[section.section]) {
+      const html = new DOMParser().parseFromString(parsedState.sections[section.section], 'text/html');
+      const innerContent = html.querySelector(section.selector)?.innerHTML || html.body.innerHTML;
+      elementToReplace.innerHTML = innerContent;
+    }
+  });
+}
+
+subscribe(PUB_SUB_EVENTS.cartUpdate, async (event) => {
+  if (window.isCleaningCart) return;
+
+  try {
+    const cartResponse = await fetch(routes.cart_url || '/cart.js');
+    if (!cartResponse.ok) return;
+    const cart = await cartResponse.json();
+
+    // 1. Group active parent bundle IDs
+    const activeParents = new Set();
+    cart.items.forEach(item => {
+      if (item.properties && item.properties._bundle_id && item.properties._is_parent === 'true') {
+        activeParents.add(item.properties._bundle_id);
+      }
+    });
+
+    // 2. Identify orphans
+    const orphans = [];
+    cart.items.forEach(item => {
+      if (item.properties && item.properties._bundle_id) {
+        if (!activeParents.has(item.properties._bundle_id)) {
+          orphans.push(item);
+        }
+      }
+    });
+
+    if (orphans.length === 0) return;
+
+    // Orphans found! Let's lock execution and delete them
+    window.isCleaningCart = true;
+
+    const updates = {};
+    orphans.forEach(item => {
+      updates[item.key] = 0; // Use the unique line item key
+    });
+
+    const sectionsToRender = getCartSectionsToRender();
+    const updateResponse = await fetch(routes.cart_update_url || '/cart/update.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        updates: updates,
+        sections: sectionsToRender.map(s => s.section),
+        sections_url: window.location.pathname
+      })
+    });
+
+    if (updateResponse.ok) {
+      const parsedState = await updateResponse.json();
+      renderCartSections(parsedState, sectionsToRender);
+
+      // Update general visibility states (e.g. toggling empty states)
+      const mainCartItems = document.querySelector('cart-items');
+      if (mainCartItems) mainCartItems.classList.toggle('is-empty', parsedState.item_count === 0);
+
+      const cartDrawerWrapper = document.querySelector('cart-drawer');
+      if (cartDrawerWrapper) cartDrawerWrapper.classList.toggle('is-empty', parsedState.item_count === 0);
+
+      const cartFooter = document.getElementById('main-cart-footer');
+      if (cartFooter) cartFooter.classList.toggle('is-empty', parsedState.item_count === 0);
+
+      // Re-trigger event for other subscribers
+      publish(PUB_SUB_EVENTS.cartUpdate, { source: 'bundle-cleanup' });
+    }
+  } catch (error) {
+    console.error('Bundle cleanup failed:', error);
+  } finally {
+    window.isCleaningCart = false;
+  }
+});
