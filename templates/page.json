@@ -11,13 +11,234 @@
   "sections": {
     "main": {
       "type": "main-page",
+      "disabled": true,
       "settings": {
         "padding_top": 28,
         "padding_bottom": 28
       }
+    },
+    "blocks_EX3y6a": {
+      "type": "_blocks",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading_text": "THE BRIDLEN STORY",
+            "heading_tag": "h2",
+            "heading_size": 32,
+            "font_weight": "700",
+            "text_alignment": "center",
+            "text_color": "#000000",
+            "desktop_width_percent": 100
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": ["heading"],
+      "name": "Heading",
+      "settings": {}
+    },
+    "image_with_text_M9yjCE": {
+      "type": "image-with-text",
+      "blocks": {
+        "text_dpXUXR": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Bridlen is the brainchild of two seasoned shoemakers, Mr. Hasan and Mr. Watanabe, who embarked on the quest to craft a line of classic men's shoes that would be accessible to a larger audience.<br/><br/>Designed to appeal to the discerning shoe connoisseur, Bridlen merged Mr. Watanabe's Japanese essence of masterful craftsmanship with Mr. Hasan's meticulous eye for detail and ardent love for leather and shoemaking.<br/><br/>Bridlen began as an online store in Japan and has steadily grown to have a global presence. Focusing on factory processes such as 360° channeling and 3D upper attachment.<br/><br/>Bridlen's goal is to incorporate as many bespoke elements as possible into its factory-made Goodyear Welted shoes.<br/><br/></p>",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": ["text_dpXUXR"],
+      "name": "t:sections.image-with-text.presets.name",
+      "settings": {
+        "image": "shopify://shop_images/t1.webp",
+        "height": "medium",
+        "desktop_image_width": "medium",
+        "layout": "image_first",
+        "desktop_content_position": "top",
+        "desktop_content_alignment": "left",
+        "content_layout": "no-overlap",
+        "color_scheme": "background-1",
+        "image_behavior": "none",
+        "mobile_content_alignment": "left",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "video_JV4YyJ": {
+      "type": "video",
+      "name": "t:sections.video.presets.name",
+      "settings": {
+        "heading": "",
+        "heading_size": "h1",
+        "enable_video_looping": false,
+        "video_url": "https://youtu.be/dAq_FPUPZpI?si=gMOdW0mRYBMjNMvH",
+        "cover_image": "shopify://shop_images/t2.webp",
+        "description": "The Bridlen Story",
+        "full_width": true,
+        "color_scheme": "background-1",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "image_with_text_G46Xt7": {
+      "type": "image-with-text",
+      "blocks": {
+        "text_XrDW7r": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Hasan, a leatherman first had a deep passion for developing and making fine leathers. As a first-generation shoemaker, his clients in the UK, France, Italy, Germany Switzerland, Spain and Portugal found his knowledge and understanding of leather very beneficial when making their shoes in his factory. His values of transparency, honesty and candour in business, while strange to some in the business world, appealed to those who held or practiced similar views. When this came to the knowledge of Mr. Watanabe, who worked as a shoemaker with a Goodyear welted shoe factory, they met and hit it off first as friends.<br/><br/>A meeting of the minds, they had a shared vision and philosophy when it came to quality, craft, attention-to detail, and ethics of doing business, standards common of a bygone era, rarely seen or practiced in today’s day and age. Together they wanted to make shoes hitherto not seen in factory made shoes. In terms of the craftsmanship, Mr. Watanabe was happy to teach from his decades of experience as a shoemaker in Japan and Spain, and bring back certain concepts of bespoke shoemaking that factories mostly choose not to practise due to the level of complexity and time it takes to do them.<br/><br/>They also brought in high specifications of materials, using leathers from the best tanneries in the world usually seen in high-end brands or bespoke shoemakers only.<br/><br/></p>",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": ["text_XrDW7r"],
+      "name": "t:sections.image-with-text.presets.name",
+      "settings": {
+        "image": "shopify://shop_images/t3.webp",
+        "height": "small",
+        "desktop_image_width": "medium",
+        "layout": "text_first",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "content_layout": "overlap",
+        "color_scheme": "background-1",
+        "image_behavior": "none",
+        "mobile_content_alignment": "center",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "image_with_text_YYGcGx": {
+      "type": "image-with-text",
+      "blocks": {
+        "text_9aV6zT": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Today, these ideals and founding vision are respected in letter and spirit by the next generation of shoemakers in the factory. Mr. Hasan’s sudden demise in 2019 was a huge setback to the team who looked to him for vision and direction. But instead of losing hope, true to one of his strongest ideals: to never give up on a good, honest mission, the team regathered with a renewed vigour, to keep his memory and philosophy of excellence alive.<br/><br/>His secret to staying relevant, he said, was by constantly and consistently learning new skills and looking to improve on what we are already doing.<br/><br/>This adage paved the way to the Founders collection, where we continue to push our boundaries of shoemaking and learning, bringing the best shoes we can possibly make for our clients. ‘If we spend a whole lifetime chasing perfection and even if we do not reach it, it will still be a life well spent’. Humbly we look to spend our lives well, making shoes that would have made him proud, as we hope it will make you proud to wear them.<br/><br/></p>",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": ["text_9aV6zT"],
+      "name": "t:sections.image-with-text.presets.name",
+      "settings": {
+        "image": "shopify://shop_images/t4.webp",
+        "height": "adapt",
+        "desktop_image_width": "medium",
+        "layout": "image_first",
+        "desktop_content_position": "top",
+        "desktop_content_alignment": "left",
+        "content_layout": "no-overlap",
+        "color_scheme": "background-1",
+        "image_behavior": "none",
+        "mobile_content_alignment": "left",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "1779865784704d16ad": {
+      "type": "_blocks",
+      "blocks": {
+        "heading_JfeChn": {
+          "type": "heading",
+          "settings": {
+            "heading_text": "RESPONSIBLE MANUFACTURING",
+            "heading_tag": "h2",
+            "heading_size": 32,
+            "font_weight": "400",
+            "text_alignment": "center",
+            "text_color": "#000000",
+            "desktop_width_percent": 100
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": ["heading_JfeChn"],
+      "settings": {}
+    },
+    "multirow_eaDXnF": {
+      "type": "multirow",
+      "blocks": {
+        "row_Hx7F9A": {
+          "type": "row",
+          "settings": {
+            "image": "shopify://shop_images/t5.webp",
+            "caption": "",
+            "heading": "",
+            "text": "<p>Given that we make our shoes in India, it is obvious we have a cost advantage which we rightfully pass on to the customers, by pricing our shoes competitively. But this should not be confused with underpaying the craftsmen and women who work for us. For the record, we as a factory have been making and exporting shoes for more than 30 years now, meeting and surpassing the stringent statutory standards that are expected to operate in this area of business. Our shoemakers are paid well above the minimum wage and in commensurate with their experience. Everyone has health insurance and contributions made towards their retirement fund. We pride in making quality our priority, in every process of work, so no one feels the pressure to work based on quantity. Our shoes are made in a clean, safe, well-lit and ventilated, organized factory with access to clean drinking water, a lunch room, well maintained restrooms and access to personal protective equipment where the operation needs it. <br/><br/><br/></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "row_j9Jzty": {
+          "type": "row",
+          "settings": {
+            "image": "shopify://shop_images/t6.webp",
+            "caption": "",
+            "heading": "",
+            "text": "<p>We also look to minimize our impact on the environment by ensuring waste is segregated at source, and almost all streams are either upcycled or recycled responsibly through the right vendors. We take initiatives to reduce the use of plastic in our processes and introduce more sustainable materials that will last longer and are better for the users and the environment. <br/></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        },
+        "row_FafcB4": {
+          "type": "row",
+          "settings": {
+            "image": "shopify://shop_images/t7.webp",
+            "caption": "",
+            "heading": "",
+            "text": "<p>It must be noted that we do this, not simply because our customers might demand this or the law of the land requires it, but rather that it is the right thing to do. We believe if we take care of our workers, ensure our suppliers are our partners by building long term relationships with them and finally, listen closely and deliver what our customers want, we will have well and truly done our job right and will be taken care of ourselves. If you have any questions in this regard or anything else for that matter, I invite you to write to me  atshoemaker@bridlen.com. I will be happy to engage with you.<br/><br/><br/></p>",
+            "button_label": "",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": ["row_Hx7F9A", "row_j9Jzty", "row_FafcB4"],
+      "name": "t:sections.multirow.presets.name",
+      "settings": {
+        "image_height": "medium",
+        "desktop_image_width": "medium",
+        "heading_size": "h1",
+        "text_style": "body",
+        "button_style": "secondary",
+        "desktop_content_position": "middle",
+        "desktop_content_alignment": "left",
+        "image_layout": "alternate-left",
+        "section_color_scheme": "background-1",
+        "row_color_scheme": "background-1",
+        "mobile_content_alignment": "left",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "video_3wMptk": {
+      "type": "video",
+      "name": "t:sections.video.presets.name",
+      "settings": {
+        "heading": "",
+        "heading_size": "h1",
+        "enable_video_looping": false,
+        "video_url": "https://youtu.be/dAq_FPUPZpI?si=e_rM0moRBUtqdDVd",
+        "cover_image": "shopify://shop_images/t8.webp",
+        "description": "The Bridle Story. Shoe making from Tokyo to Madras",
+        "full_width": true,
+        "color_scheme": "background-1",
+        "padding_top": 36,
+        "padding_bottom": 0
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "blocks_EX3y6a",
+    "image_with_text_M9yjCE",
+    "video_JV4YyJ",
+    "image_with_text_G46Xt7",
+    "image_with_text_YYGcGx",
+    "1779865784704d16ad",
+    "multirow_eaDXnF",
+    "video_3wMptk"
   ]
 }

@@ -1,0 +1,176 @@
+{% comment %}
+  Custom Heading Block
+  Provides a robust, merchant-friendly heading with variable sizing, tags, alignments, and widths.
+{% endcomment %}
+
+{%- assign block_id = block.id | replace: '_', '' | replace: '-', '' | downcase -%}
+
+{%- style -%}
+  .custom-heading-{{ block_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding-top: {{ block.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ block.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  .custom-heading__text-{{ block_id }} {
+    font-size: {{ block.settings.heading_size }}px;
+    font-weight: {{ block.settings.font_weight }};
+    text-align: {{ block.settings.text_alignment }};
+    color: {{ block.settings.text_color }};
+    margin: 0;
+  }
+
+  @media screen and (min-width: 750px) {
+    .custom-heading-{{ block_id }} {
+      padding-top: {{ block.settings.padding_top }}px;
+      padding-bottom: {{ block.settings.padding_bottom }}px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .custom-heading__text-{{ block_id }} {
+      font-size: calc({{ block.settings.heading_size }}px * 0.7);
+    }
+  }
+{%- endstyle -%}
+
+<custom-heading-{{ block_id }} class="custom-heading-{{ block_id }}" {{ block.shopify_attributes }}>
+  {%- case block.settings.heading_tag -%}
+    {%- when 'h1' -%}
+      <h1 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h1>
+    {%- when 'h2' -%}
+      <h2 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h2>
+    {%- when 'h3' -%}
+      <h3 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h3>
+    {%- when 'h4' - -%}
+      <h4 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h4>
+    {%- when 'h5' -%}
+      <h5 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h5>
+    {%- else -%}
+      <h6 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h6>
+  {%- endcase -%}
+</custom-heading-{{ block_id }}>
+
+<script>
+  (function() {
+    if (!customElements.get('custom-heading-{{ block_id }}')) {
+      class CustomHeading{{ block_id }} extends HTMLElement {
+        constructor() {
+          super();
+        }
+        connectedCallback() {
+          this.style.display = 'block';
+        }
+      }
+      customElements.define('custom-heading-{{ block_id }}', CustomHeading{{ block_id }});
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Heading",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading_text",
+      "label": "Heading text",
+      "default": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_tag",
+      "label": "Heading tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading size",
+      "min": 16,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font weight",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semi bold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Heading"
+    }
+  ]
+}
+{% endschema %}
