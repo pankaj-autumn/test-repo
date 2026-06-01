@@ -17,7 +17,7 @@
         "announcement-bar-0": {
           "type": "announcement",
           "settings": {
-            "text": "Welcome to our store",
+            "text": "One simple price for all international customers. Duties included. No hidden costs. (From April 11, 2026 onwards)",
             "text_alignment": "center",
             "color_scheme": "background-1",
             "link": ""
