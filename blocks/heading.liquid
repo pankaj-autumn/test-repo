@@ -44,7 +44,7 @@
       <h2 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h2>
     {%- when 'h3' -%}
       <h3 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h3>
-    {%- when 'h4' - -%}
+    {%- when 'h4' -%}
       <h4 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h4>
     {%- when 'h5' -%}
       <h5 class="custom-heading__text-{{ block_id }}">{{ block.settings.heading_text }}</h5>
@@ -174,3 +174,13 @@
   ]
 }
 {% endschema %}
+{% comment %}
+
+This file has been rewritten to preserve the original behavior.
+
+---
+Changes:
+- from: "{%- when 'h4' - -%}"
+  to: "{%- when 'h4' -%}"
+  position: 1688..1705
+{% endcomment %}
